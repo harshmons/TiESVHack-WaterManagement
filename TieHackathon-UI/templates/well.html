@@ -1,0 +1,91 @@
+<div class="container" style="width:100%">
+	<div class="row">
+		<div class="col-md-12 text-center">
+			<h3>
+				<span class="label label-info"> {{parameter.Name}} Details </span>
+			</h3>
+		</div>
+	</div>
+	<div class="row">
+		<table class="table">
+			<tr>
+				<td>WaterSourceID</td>
+				<td>
+					<span class="label label-success">
+						{{parameter.WaterSourceID}}
+					</span>	
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					Metered ?
+				</td>
+				<td>
+					<span ng-show="parameter.Metered == 'false'" >
+						<!-- {{parameter.Metered}} -->
+						<img src="/images/icons/wrong.png" height="30px" width="30px"> </img>
+					</span>
+					<span ng-show="parameter.Metered == 'true'">
+						<!-- {{parameter.Metered}} -->
+						<img src="/images/icons/right.png" height="30px" width="30px"> </img>
+					</span>
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					Instrumented ?
+				</td>
+				<td>
+					<span ng-show="parameter.Instrumented == 'false'">
+						<!-- {{parameter.Instrumented}} -->
+						<img src="/images/icons/wrong.png" height="30px" width="30px"> </img>
+					</span>
+					<span ng-show="parameter.Instrumented == 'true'">
+						<!-- {{parameter.Instrumented}} -->
+						<img src="/images/icons/right.png" height="30px" width="30px"> </img>
+					</span>
+					
+				</td>
+			</tr>
+			<tr>
+				<td>
+					EcoliSensorId 
+				</td>
+				<td>
+					{{parameter.EcoliSensorId}}
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					QueueSize 
+				</td>
+				<td>
+					<span class="badge">
+						{{parameter.QueueSize}}
+					</span>	
+				</td>
+			</tr>
+			<tr>
+				<td>
+					PersonTime 
+				</td>
+				<td>
+					{{parameter.PersonTime}}
+				</td>
+			</tr>
+			<tr>
+				<td>
+					WaitTime 
+				</td>
+				<td>
+					{{parameter.WaitTime}}
+				</td>
+			</tr>
+
+		</table>
+	</div>
+
+</div>

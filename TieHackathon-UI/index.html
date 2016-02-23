@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html xmlns:ng="http://angularjs.org/" ng-app="appMaps">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Water Management</title>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://static.fusioncharts.com/code/latest/fusioncharts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.4/angular.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.1.1/ui-bootstrap-tpls.min.js"></script>
+    <script type="text/javascript" src="ext_js/fusionChart/angular-fusioncharts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.js"></script>
+    <script src="http://rawgit.com/angular-ui/angular-google-maps/2.0.X/dist/angular-google-maps.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/x2js/1.2.0/xml2json.min.js"></script>
+    <script type='text/javascript' src='app.js'></script><!--script-->
+    <script type="text/javascript" src="queryService.js"></script>
+    <script type="text/javascript" src="config.js"></script>
+
+    <!--css-->
+    <style type="text/css">
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0px;
+        }
+
+        #map_canvas {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            margin:auto;
+
+        }
+
+        .angular-google-map-container {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+        }
+	  	
+	  	#legend {
+    		background: white;
+    		padding: 10px;
+  		}
+
+        .notification-label
+        {
+            font-family: Serif , "Times New Roman", Georgia;
+            font-size: 20px;
+            border-color: green; 
+            border-bottom: 1px solid #d4d4d4;
+            padding:5px 5px 0px 5px;
+        }
+        .notification-values
+        {
+            font-size:24px;
+            color:grey;
+            padding:5px 5px 0px 5px;
+        }
+        body
+        { 
+          //padding-top: 70px;
+            background-color: #5e5e5e;
+        }
+
+        .alert-box-position{
+            position: fixed ;
+            top: 60px;
+            right: 20px;
+        }
+
+        .stats-box-position{
+            position: fixed ;
+            top: 60px;
+            left: 20px;
+        }
+
+        .auto-hide-alert-position{
+            position: fixed ;
+            top: 0px;
+            left: 0px;
+            width: 100%;   
+        }
+        .buttons-position{
+            position: fixed;
+            bottom : 60px;
+            left: 40px;
+        }
+        .graph-button-position{
+            position: fixed;
+            bottom:10px;
+            left:30%;
+        }
+
+        .table tr{
+            font-family: "Time New Roman";
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .table td{
+            font-family: "Time New Roman";
+            font-size: 17px;
+        }
+    </style>
+</head>
+
+<body ng-controller="mainCtrl">
+    
+    <!-- Google Map Section -->
+        <div id="map_canvas" >
+
+            <script type="text/ng-template" id="control.tpl.html">
+                <div>
+                    <span ng-repeat="legend in legends" style="margin:0px 10px">
+                        <img src="{{legend.legendIcon}}" > </img>
+                        <b> {{legend.legendName}} </b>      
+                    </span>
+                </div>
+            </script>
+
+            <ui-gmap-google-map center="mapOptions.center" zoom="mapOptions.zoom" options="mapOptions.options" control="mapControl">
+                <ui-gmap-map-control template="control.tpl.html" position="top-right" controller="mainCtrl" index="-1"></ui-gmap-map-control>
+
+                <ui-gmap-marker idkey="markerOption.id"   coords="markerOption.coords" options="markerOption.options" ng-repeat="markerOption in markerOptions.residents" ng-if="showMarkerType == 'Residents' || showMarkerType == 'All' " events="markerOption.markersEvents">
+                    <ui-gmap-window options="markerOption.windowOptions" closeClick="closeClick(markerOption)" templateUrl="'templates/resident.html'" templateParameter="templateParameter">                    
+                            <div>{{title}}</div>
+                        </ui-gmap-window>    
+                  
+                </ui-gmap-marker>
+
+                <ui-gmap-marker idkey="markerOption.id"   coords="markerOption.coords" options="markerOption.options" ng-repeat="markerOption in markerOptions.wells" ng-if="showMarkerType == 'Wells' || showMarkerType == 'All'"  
+                events="markerOption.markersEvents" >
+                <!--
+                click="markerClicked(markerOption)">
+                -->
+                        <ui-gmap-window options="markerOption.windowOptions" closeClick="closeClick(markerOption)" templateUrl="'templates/well.html'" templateParameter="templateParameter" >                    
+                            <div>{{title}}</div>
+                        </ui-gmap-window>    
+                  
+                </ui-gmap-marker>
+
+                <ui-gmap-marker idkey="markerOption.id"   coords="markerOption.coords" options="markerOption.options" ng-repeat="markerOption in markerOptions.mobileVendors" ng-if="showMarkerType == 'MobileVendors' || showMarkerType == 'All'" events="markerOption.markersEvents">
+                    
+                    <ui-gmap-window options="markerOption.windowOptions" closeClick="closeClick(markerOption)" templateUrl="'templates/mobileVendor.html'" templateParameter="templateParameter">
+                        <div>{{title}}</div>
+                    </ui-gmap-window>    
+
+                  
+                </ui-gmap-marker>
+
+                <ui-gmap-marker idkey="markerOption.id"   coords="markerOption.coords" options="markerOption.options" ng-repeat="markerOption in markerOptions.standPipes" ng-if="showMarkerType == 'StandPipes' || showMarkerType == 'All'" events="markerOption.markersEvents">
+                    
+                    <ui-gmap-window options="markerOption.windowOptions" closeClick="closeClick(markerOption)" templateUrl="'templates/standPipe.html'" templateParameter="templateParameter">
+                        <div>{{title}}</div>
+                    </ui-gmap-window>    
+                  
+                </ui-gmap-marker>
+
+                <ui-gmap-marker idkey="markerOption.id"   coords="markerOption.coords" options="markerOption.options" ng-repeat="markerOption in markerOptions.householdResellers" ng-if="showMarkerType == 'HouseholdResellers' || showMarkerType == 'All'" events="markerOption.markersEvents">
+                    
+                    <ui-gmap-window options="markerOption.windowOptions" closeClick="closeClick(markerOption)" templateUrl="'templates/householdReseller.html'" templateParameter="templateParameter">
+                        <div>{{title}}</div>
+                    </ui-gmap-window>    
+                  
+                </ui-gmap-marker>
+
+            </ui-gmap-google-map>
+        
+        </div>
+
+
+    <!-- <section id="header" >
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="row">
+                <p class="navbar-text"> Header Section </p>
+            </div>    
+        </div>
+    </nav>
+    </section> -->
+    
+    <div class="alert alert-danger auto-hide-alert-position text-center" id="error-alert">
+        <button type="button" class="close" data-dismiss="alert">x</button>
+        <strong>{{errorMessage}} </strong>
+        
+    </div>
+
+    <!--Right Side Notification Tab showing Current Day , Working Hour's , NGO's Current Balance , NGO's Startinng Balance-->       
+        <div class="container-fluid alert-box-position">
+            <div class="pull-right alert alert-info">
+                <span class="notification-label">
+                    Current Day 
+                </span>    
+                <span class="glyphicon glyphicon-hand-right"></span>
+                <span class="notification-values"> {{notifiedDate | date:'dd, MMMM yyyy'}} </span>
+                <br/>
+
+                <span class="notification-label">
+                    Current Working Hour
+                </span>
+                <span class="glyphicon glyphicon-hand-right"> </span>
+                <span class="notification-values"> {{notifiedTime}} </span>
+                <br/>
+
+                <span class="notification-label">
+                    NGO's Current Balance
+                </span>
+                <span class="glyphicon glyphicon-hand-right"> </span>
+                <span class="notification-values">{{currentBalance}} </span>
+                <br/>
+
+                <span class="notification-label">
+                    NGO's Starting Balance
+                </span>
+                <span class="glyphicon glyphicon-hand-right"> </span>
+                <span class="notification-values">{{startingBalance}} </span>
+                <br/>
+            </div>
+        </div>
+
+        <div class="container-fluid stats-box-position" ng-show="showTodayStats">
+            <div class="pull-left alert alert-info">
+                <div class="text-center" style="font-size:22px">Today's Statistics</div>
+
+                <div class="container" style="width:100%;height:200px">
+                    <!-- Stand Pipe Details Starts -->
+                    <div class="row">
+                        <div class="col-md-12 pull-left">
+                            <h4 class="notification-label"> StandPipe Details :</h4>
+                        </div>
+                    </div>
+                    <div ng-repeat="standPipe in allStandPipes">
+                        <div class="row">
+                            <div class="col-md-12 pull-left ">
+                                Effective Pressure of {{standPipe.Standpipe.Name}}<span class="glyphicon glyphicon-hand-right"></span>
+                                <b>{{standPipe.Standpipe.EffectivePressure}}</b>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 pull-left ">
+                                Water Sold from {{standPipe.Standpipe.Name}}<span class="glyphicon glyphicon-hand-right"></span>
+                                <b>{{standPipe.Standpipe.WaterSold}}</b>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 pull-left ">
+                                Water Revenue from {{standPipe.Standpipe.Name}}<span class="glyphicon glyphicon-hand-right"></span>
+                                <b>{{standPipe.Standpipe.WaterRevenue}}</b>
+                            </div>
+                        </div>
+                    </div>    
+                    <!-- Stand Pipe Details Ends -->
+
+                    <!-- Well Details Starts -->
+                    <div class="row">
+                        <div class="col-md-12 pull-left">
+                            <h4 class="notification-label"> Well Details :</h4>
+                        </div>
+                    </div>
+                    <div ng-repeat="well in allWells">
+                        <div class="row">
+                            <div class="col-md-12 pull-left ">
+                                Water Revenue from {{well.Well.Name}}<span class="glyphicon glyphicon-hand-right"></span>
+                                <b>{{well.Well.WaterRevenue}}</b> 
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-12 pull-left ">
+                                Current Customer Count on {{well.well.Name}}
+                                <span class="glyphicon glyphicon-hand-right"></span> 
+                                <b>{{well.Well.CustomerCount}}</b>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Well Details Ends -->
+                    
+                    <!-- <div class="row">
+                        <div class="col-md-12 pull-left">
+                            <h4 class="notification-label"> Mobile Vendor Details :</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 pull-left">
+                            <h4 class="notification-label"> HouseHold Reseller Details : </h4>
+                        </div>
+                    </div> -->
+
+                </div>    
+            </div>
+        </div>
+        
+        <div class="container buttons-position" style="margin-bottom:5px">
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="btn-group dropup">
+                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Show Markers &nbsp;<span class="caret"></span>
+                        </button>
+                          <ul class="dropdown-menu">
+                            <li><a href="#" ng-click="showClickedMarker('All')">All</a></li>
+                            <li><a href="#" ng-click="showClickedMarker('Residents')">Residents</a></li>
+                            <li><a href="#" ng-click="showClickedMarker('Wells')">Wells</a></li>
+                            <li><a href="#" ng-click="showClickedMarker('StandPipes')">Stand Pipes</a></li>
+                            <li><a href="#" ng-click="showClickedMarker('MobileVendors')">Mobile Vendors</a></li>
+                            <li><a href="#" ng-click="showClickedMarker('HouseholdResellers')">Household Resellers</a></li>
+                          </ul>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" placeholder="Search By Name" class="form-control" ng-model="searchText"></input>    
+                        <span class="input-group-btn"> 
+                            <button class="btn btn-info" ng-click="search(OptionValue)" ng-disabled="searchText == '' || searchText == undefined ">
+                                <span class="glyphicon glyphicon-search">{{OptionValue}}</span>
+                            </button>
+                        </span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12" ng-init="OptionValue='Residents'">
+                            <label class="radio-inline">
+                                <input type="radio" name="searchOption" ng-model="OptionValue" value="Residents">Residents</input>
+                            </label>
+                            <label class="radio-inline">    
+                                <input type="radio" name="searchOption" ng-model="OptionValue" value="Wells">Wells</input>
+                            </label>
+                            <label class="radio-inline">    
+                                <input type="radio" name="searchOption" ng-model="OptionValue" value="StandPipes">Stand Pipes</input>
+                            </label>
+                            <label class="radio-inline">    
+                                <input type="radio" name="searchOption" ng-model="OptionValue" value="MobileVendors">Mobile Vendors</input>
+                            </label>
+                            <label class="radio-inline">    
+                                <input type="radio" name="searchOption" ng-model="OptionValue" value="HouseholdResellers">Household Resellers</input>
+                            </label>    
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <button class="btn btn-danger" ng-click="digWell()"> Dig Well</button>
+                </div>
+                
+                
+            </div>
+        </div>    
+        
+        <div class="graph-button-position">
+            
+            <button  class="btn btn-success" style="margin-right:20px" ng-click="showTodaysStats()">
+                <span ng-show="!showTodayStats">Show</span>
+                <span ng-show="showTodayStats">Hide</span>
+                Today's Statistics
+            </button> 
+            <button  uib-popover-template="'residentWaterAccessChartPopoverTemplate.html'" popover-placement ="top"  type="button" class="btn btn-success" style="margin-left:20px">Resident Water Access Statistics</button> 
+        </div>
+        <script type="text/ng-template" id="residentWaterAccessChartPopoverTemplate.html">
+            <div fusioncharts
+                width="600"
+                height="400"
+                type="line"
+                dataSource="{{myDataSource}}" >
+            </div>
+        </script>
+
+    <!-- <section id="Footer" >
+        <nav class="navbar navbar-default navbar-fixed-bottom">
+            <div class="container">
+                <div class="row">
+                    <p class="navbar-text"> Footer Section </p>
+                
+                </div>    
+            </div>
+        </nav>
+    </section>
+ -->
+<!--example-->
+</body>
+
+</html>
+

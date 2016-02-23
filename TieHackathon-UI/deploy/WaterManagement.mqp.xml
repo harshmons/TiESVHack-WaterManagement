@@ -1,0 +1,29 @@
+<NewPackage>
+  <RESTHeaders>
+    <Headers>
+      <Connection>close</Connection>
+      <Access-Control-Allow-Origin>*</Access-Control-Allow-Origin>
+      <Access-Control-Allow-Methods>GET, POST, PUT
+      </Access-Control-Allow-Methods>
+      <Access-Control-Allow-Headers>Content-Type,
+        X-Atomiton-Studio-Key,X-Atomiton-Session-Key
+      </Access-Control-Allow-Headers>
+    </Headers>
+  </RESTHeaders>
+  <GenerateMessage>
+    <Message>
+      <Value>
+        <Include>[:@RT:]GenMsgArgs</Include>
+      </Value>
+    </Message>
+  </GenerateMessage>
+
+  <NewFacetInstance fid="[:SffDefaultFacet:]" name="File" Type="SffHttpStaticFileFacet">
+    <OnActivate>
+      <Process BasePath="TieHackathon-UI" Resource="" TailPath="index.html">
+        <Include>RESTHeaders</Include>
+      </Process>
+    </OnActivate>
+  </NewFacetInstance>
+ 
+</NewPackage>
